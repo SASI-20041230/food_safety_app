@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:food_safety_app/providers/auth_provider.dart';
-import 'package:food_safety_app/providers/restaurant_provider.dart';
-import 'package:food_safety_app/providers/report_provider.dart';
-import 'package:food_safety_app/providers/inspection_provider.dart';
-import 'package:food_safety_app/screens/auth/login_screen.dart';
-import 'package:food_safety_app/screens/citizen/home_screen.dart';
-import 'package:food_safety_app/screens/inspector/dashboard.dart';
-import 'package:food_safety_app/screens/admin/admin_dashboard.dart'; // Add this import
+import 'package:food_guard/providers/auth_provider.dart';
+import 'package:food_guard/providers/restaurant_provider.dart';
+import 'package:food_guard/providers/report_provider.dart';
+import 'package:food_guard/providers/inspection_provider.dart';
+import 'package:food_guard/providers/activity_provider.dart';
+import 'package:food_guard/screens/auth/login_screen.dart';
+import 'package:food_guard/screens/citizen/home_screen.dart';
+import 'package:food_guard/screens/inspector/dashboard.dart';
+import 'package:food_guard/screens/admin/admin_dashboard.dart'; // Add this import
 
 void main() {
   runApp(
@@ -17,6 +18,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => RestaurantProvider()),
         ChangeNotifierProvider(create: (_) => ReportProvider()),
         ChangeNotifierProvider(create: (_) => InspectionProvider()),
+        ChangeNotifierProvider(create: (_) => ActivityProvider()),
       ],
       child: const MyApp(),
     ),
@@ -44,12 +46,10 @@ class MyApp extends StatelessWidget {
           secondary: Color(0xFF10B981), // Emerald green
           tertiary: Color(0xFFF59E0B), // Amber
           surface: Colors.white,
-          background: Color(0xFFF8FAFC),
           error: Color(0xFFEF4444),
           onPrimary: Colors.white,
           onSecondary: Colors.white,
           onSurface: Color(0xFF1E293B),
-          onBackground: Color(0xFF1E293B),
         ),
 
         // App bar theme
@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           color: Colors.white,
-          shadowColor: Colors.black.withOpacity(0.08),
+          shadowColor: Colors.black.withValues(alpha: 0.08),
           surfaceTintColor: Colors.transparent,
         ),
 
@@ -238,7 +238,7 @@ class MyApp extends StatelessWidget {
         // Chip theme
         chipTheme: ChipThemeData(
           backgroundColor: const Color(0xFFF1F5F9),
-          selectedColor: const Color(0xFF2563EB).withOpacity(0.1),
+          selectedColor: const Color(0xFF2563EB).withValues(alpha: 0.1),
           checkmarkColor: const Color(0xFF2563EB),
           deleteIconColor: const Color(0xFFEF4444),
           labelStyle: const TextStyle(
@@ -320,7 +320,7 @@ class AppWrapper extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 24,
                       spreadRadius: 4,
                       offset: const Offset(0, 8),
@@ -359,7 +359,7 @@ class AppWrapper extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Padding(

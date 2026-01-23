@@ -19,8 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _emailController.text = '${_selectedRole}@example.com';
-    _passwordController.text = 'password123';
+    // No pre-filled demo credentials
   }
 
   @override
@@ -347,6 +346,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           TextButton(
                             onPressed: () {
+                              // Clear any existing errors before navigating
+                              authProvider.clearError();
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => const RegistrationScreen(),
@@ -370,52 +371,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
 
                 const SizedBox(height: 24),
-
-                // Demo Credentials
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0F9FF),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFBAE6FD),
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 20,
-                            color: const Color(0xFF0369A1),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Demo Credentials',
-                            style: TextStyle(
-                              color: const Color(0xFF0369A1),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Use the pre-filled credentials or create your own account to explore the app.',
-                        style: TextStyle(
-                          color: const Color(0xFF0369A1),
-                          fontSize: 12,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -432,8 +387,7 @@ class _LoginScreenState extends State<LoginScreen> {
         onTap: () {
           setState(() {
             _selectedRole = role.toLowerCase();
-            _emailController.text = '${_selectedRole}@example.com';
-            _passwordController.text = 'password123';
+            // No pre-filled credentials
           });
         },
         borderRadius: BorderRadius.circular(12),

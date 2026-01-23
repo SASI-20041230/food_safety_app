@@ -5,6 +5,8 @@ import '../../providers/inspection_provider.dart';
 import '../../providers/report_provider.dart';
 import '../../models/inspection.dart';
 import 'new_inspection.dart';
+import '../profile_screen.dart';
+import '../settings_screen.dart';
 
 class InspectorDashboard extends StatefulWidget {
   const InspectorDashboard({super.key});
@@ -23,7 +25,6 @@ class _InspectorDashboardState extends State<InspectorDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     final inspectionProvider = Provider.of<InspectionProvider>(context);
     final reportProvider = Provider.of<ReportProvider>(context);
     
@@ -44,10 +45,14 @@ class _InspectorDashboardState extends State<InspectorDashboard> {
             onSelected: (value) {
               switch (value) {
                 case 'profile':
-                  // Navigate to profile
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
                   break;
                 case 'settings':
-                  // Navigate to settings
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
                   break;
                 case 'logout':
                   _logout(context);

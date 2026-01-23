@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import '../../providers/auth_provider.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../providers/report_provider.dart';
 import 'manage_restaurants.dart';
 import 'review_reports.dart';
 import 'user_management.dart';
+import '../profile_screen.dart';
+import '../settings_screen.dart';
+import 'system_settings.dart';
+import 'activity_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -16,6 +21,7 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   int _selectedIndex = 0;
+  Timer? _realTimeUpdateTimer;
 
   void _logout(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -28,6 +34,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     const ManageRestaurantsScreen(),
     const ReviewReportsScreen(),
     const UserManagementScreen(),
+    const SystemSettingsScreen(),
   ];
 
   @override
@@ -36,6 +43,22 @@ class _AdminDashboardState extends State<AdminDashboard> {
     // Load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
+      _startRealTimeUpdates();
+    });
+  }
+
+  @override
+  void dispose() {
+    _realTimeUpdateTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startRealTimeUpdates() {
+    // Update data every 30 seconds to simulate real-time updates
+    _realTimeUpdateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (mounted) {
+        _loadInitialData();
+      }
     });
   }
 
@@ -71,10 +94,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
             onSelected: (value) {
               switch (value) {
                 case 'profile':
-                  // Navigate to profile
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
                   break;
                 case 'settings':
-                  // Navigate to settings
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
                   break;
                 case 'logout':
                   _logout(context);
@@ -139,6 +166,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
             icon: Icon(Icons.people),
             label: 'Users',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.deepPurple,
@@ -159,7 +190,7 @@ class DashboardHome extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
 
     final totalRestaurants = restaurantProvider.restaurants.length;
-    final pendingReports = reportProvider.reports.where((r) => r.status == 'pending').length;
+    final pendingReports = reportProvider.getPendingReports().length;
     final totalUsers = authProvider.allUsers.length;
     final totalReports = reportProvider.reports.length;
 
@@ -337,10 +368,10 @@ class DashboardHome extends StatelessWidget {
                 icon: Icons.settings,
                 color: Colors.purple,
                 onTap: () {
-                  // Navigate to settings
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Settings page coming soon!'),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SystemSettingsScreen(),
                     ),
                   );
                 },
@@ -404,10 +435,10 @@ class DashboardHome extends StatelessWidget {
                   Center(
                     child: TextButton(
                       onPressed: () {
-                        // View all activity
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Activity log page coming soon!'),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ActivityScreen(),
                           ),
                         );
                       },

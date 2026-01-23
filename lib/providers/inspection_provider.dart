@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/inspection.dart';
-import '../models/user.dart';
 
 class InspectionProvider with ChangeNotifier {
   List<Inspection> _inspections = [];

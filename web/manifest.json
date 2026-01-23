@@ -1,11 +1,11 @@
 {
-    "name": "food_safety_app",
-    "short_name": "food_safety_app",
+    "name": "Food Guard",
+    "short_name": "Food Guard",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#hexcode",
+    "theme_color": "#hexcode",
+    "description": "AI-Powered Food Safety Monitoring App",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

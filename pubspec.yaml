@@ -1,4 +1,4 @@
-name: food_safety_app
+name: food_guard
 description: AI-Powered Food Safety Monitoring App
 
 publish_to: 'none'
@@ -20,6 +20,22 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "logo.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "logo.png"
+    icon_size: 48 # min:48, max:256, default: 48

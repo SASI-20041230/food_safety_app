@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   Map<String, dynamic>? _user;
   String? _error;
   List<Map<String, dynamic>> _allUsers = [];
+  SharedPreferences? _prefs;
 
   bool get isLoading => _isLoading;
   Map<String, dynamic>? get user => _user;
@@ -16,25 +19,97 @@ class AuthProvider with ChangeNotifier {
   // Get current user as User model (for admin dashboard)
   Map<String, dynamic>? get currentUser => _user;
 
+  AuthProvider() {
+    _initPrefs();
+  }
+
+  Future<void> _initPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+    await _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    if (_prefs == null) return;
+    
+    final usersJson = _prefs!.getString('users');
+    if (usersJson != null) {
+      final List<dynamic> usersList = json.decode(usersJson);
+      _allUsers = usersList.map((user) => Map<String, dynamic>.from(user)).toList();
+    }
+    // No demo users initialization - start with empty user list
+    notifyListeners();
+  }
+
+  Future<void> _saveUsers() async {
+    if (_prefs == null) return;
+    
+    final usersJson = json.encode(_allUsers);
+    await _prefs!.setString('users', usersJson);
+  }
+
   Future<bool> login(String email, String password, String role) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
 
-    // Mock user data
-    _user = {
-      'id': '${role}_${DateTime.now().millisecondsSinceEpoch}',
-      'email': email,
-      'name': '${role[0].toUpperCase()}${role.substring(1)} User',
-      'fullName': '${role[0].toUpperCase()}${role.substring(1)} User',
-      'role': role,
-      'phoneNumber': '+91 9876543210',
-      'isActive': true,
-      'createdAt': DateTime.now().toIso8601String(),
-    };
+    // Validate input
+    if (email.isEmpty || password.isEmpty) {
+      _error = 'Please fill in all fields';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
 
+    // Email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      _error = 'Please enter a valid email address';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Find user by email
+    final user = _allUsers.firstWhere(
+      (user) => user['email'] == email,
+      orElse: () => {},
+    );
+
+    if (user.isEmpty) {
+      _error = 'No account found with this email address';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Check password
+    if (user['password'] != password) {
+      _error = 'Incorrect password';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Check role
+    if (user['role'] != role) {
+      _error = 'Account role does not match selected role';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Check if account is active
+    if (!user['isActive']) {
+      _error = 'Account is deactivated. Please contact support.';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Login successful
+    _user = Map<String, dynamic>.from(user);
     _isLoading = false;
     notifyListeners();
     return true;
@@ -53,6 +128,40 @@ class AuthProvider with ChangeNotifier {
 
     await Future.delayed(const Duration(seconds: 2));
 
+    // Validate input
+    if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty) {
+      _error = 'Please fill in all fields';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      _error = 'Please enter a valid email address';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Password validation
+    if (password.length < 6) {
+      _error = 'Password must be at least 6 characters long';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Phone validation
+    final phoneRegex = RegExp(r'^\+91\s\d{10}$');
+    if (!phoneRegex.hasMatch(phoneNumber)) {
+      _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
     // Check if email already exists
     final existingUser = _allUsers.firstWhere(
       (user) => user['email'] == email,
@@ -70,6 +179,7 @@ class AuthProvider with ChangeNotifier {
     final newUser = {
       'id': 'citizen_${DateTime.now().millisecondsSinceEpoch}',
       'email': email,
+      'password': password, // In production, hash this
       'name': fullName,
       'fullName': fullName,
       'role': 'citizen',
@@ -80,6 +190,7 @@ class AuthProvider with ChangeNotifier {
     };
 
     _allUsers.add(newUser);
+    await _saveUsers();
     _user = newUser;
 
     _isLoading = false;
@@ -102,6 +213,41 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(const Duration(seconds: 2));
+
+    // Validate input
+    if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty || 
+        registrationCode.isEmpty || department.isEmpty || licenseNumber.isEmpty) {
+      _error = 'Please fill in all fields';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      _error = 'Please enter a valid email address';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Password validation
+    if (password.length < 6) {
+      _error = 'Password must be at least 6 characters long';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Phone validation
+    final phoneRegex = RegExp(r'^\+91\s\d{10}$');
+    if (!phoneRegex.hasMatch(phoneNumber)) {
+      _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
 
     // Validate registration code (mock validation)
     const validCodes = ['INSPECTOR2024', 'FSSAI2024', 'FOODSAFE2024'];
@@ -129,6 +275,7 @@ class AuthProvider with ChangeNotifier {
     final newUser = {
       'id': 'inspector_${DateTime.now().millisecondsSinceEpoch}',
       'email': email,
+      'password': password, // In production, hash this
       'name': fullName,
       'fullName': fullName,
       'role': 'inspector',
@@ -141,6 +288,7 @@ class AuthProvider with ChangeNotifier {
     };
 
     _allUsers.add(newUser);
+    await _saveUsers();
     _user = newUser;
 
     _isLoading = false;
@@ -162,6 +310,41 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(const Duration(seconds: 2));
+
+    // Validate input
+    if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty || 
+        adminCode.isEmpty || organization.isEmpty) {
+      _error = 'Please fill in all fields';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      _error = 'Please enter a valid email address';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Password validation
+    if (password.length < 6) {
+      _error = 'Password must be at least 6 characters long';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    // Phone validation
+    final phoneRegex = RegExp(r'^\+91\s\d{10}$');
+    if (!phoneRegex.hasMatch(phoneNumber)) {
+      _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
 
     // Validate admin code (mock validation)
     const validAdminCodes = ['ADMIN2024', 'SUPERADMIN', 'FSSAISUPER'];
@@ -189,6 +372,7 @@ class AuthProvider with ChangeNotifier {
     final newUser = {
       'id': 'admin_${DateTime.now().millisecondsSinceEpoch}',
       'email': email,
+      'password': password, // In production, hash this
       'name': fullName,
       'fullName': fullName,
       'role': 'admin',
@@ -200,6 +384,7 @@ class AuthProvider with ChangeNotifier {
     };
 
     _allUsers.add(newUser);
+    await _saveUsers();
     _user = newUser;
 
     _isLoading = false;
@@ -210,73 +395,16 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     _user = null;
     _error = null;
-    _allUsers = []; // Clear all users on logout
+    // Don't clear _allUsers on logout, they are persisted
     notifyListeners();
   }
 
   // Admin functions
   Future<void> fetchAllUsers() async {
     try {
-      // Mock data for admin dashboard
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      _allUsers = [
-        {
-          'id': 'admin_1',
-          'name': 'Admin User',
-          'email': 'admin@foodsafety.com',
-          'role': 'admin',
-          'phoneNumber': '+91 9876543210',
-          'isActive': true,
-          'createdAt': DateTime.now().subtract(Duration(days: 30)).toIso8601String(),
-        },
-        {
-          'id': 'inspector_1',
-          'name': 'Inspector One',
-          'email': 'inspector1@foodsafety.com',
-          'role': 'inspector',
-          'phoneNumber': '+91 9876543211',
-          'isActive': true,
-          'createdAt': DateTime.now().subtract(Duration(days: 25)).toIso8601String(),
-        },
-        {
-          'id': 'inspector_2',
-          'name': 'Inspector Two',
-          'email': 'inspector2@foodsafety.com',
-          'role': 'inspector',
-          'phoneNumber': '+91 9876543212',
-          'isActive': true,
-          'createdAt': DateTime.now().subtract(Duration(days: 20)).toIso8601String(),
-        },
-        {
-          'id': 'citizen_1',
-          'name': 'Citizen User',
-          'email': 'citizen@foodsafety.com',
-          'role': 'citizen',
-          'phoneNumber': '+91 9876543213',
-          'isActive': true,
-          'createdAt': DateTime.now().subtract(Duration(days: 15)).toIso8601String(),
-        },
-        {
-          'id': 'citizen_2',
-          'name': 'John Doe',
-          'email': 'john@example.com',
-          'role': 'citizen',
-          'phoneNumber': '+91 9876543214',
-          'isActive': true,
-          'createdAt': DateTime.now().subtract(Duration(days: 10)).toIso8601String(),
-        },
-        {
-          'id': 'citizen_3',
-          'name': 'Jane Smith',
-          'email': 'jane@example.com',
-          'role': 'citizen',
-          'phoneNumber': '+91 9876543215',
-          'isActive': true,
-          'createdAt': DateTime.now().subtract(Duration(days: 5)).toIso8601String(),
-        },
-      ];
-      
+      // Users are already loaded from shared preferences
+      // This method ensures users are up to date
+      await Future.delayed(const Duration(milliseconds: 300));
       notifyListeners();
     } catch (error) {
       _error = 'Failed to fetch users: $error';
@@ -340,6 +468,7 @@ class AuthProvider with ChangeNotifier {
           }
         }
         
+        await _saveUsers();
         notifyListeners();
       }
     } catch (error) {

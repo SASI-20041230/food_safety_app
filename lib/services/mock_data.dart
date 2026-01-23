@@ -1,7 +1,7 @@
-import 'package:food_safety_app/models/restaurant.dart';
-import 'package:food_safety_app/models/inspection.dart';
-import 'package:food_safety_app/models/report.dart';
-import 'package:food_safety_app/models/rating.dart';
+import 'package:food_guard/models/restaurant.dart';
+import 'package:food_guard/models/inspection.dart';
+import 'package:food_guard/models/report.dart';
+import 'package:food_guard/models/rating.dart';
 
 class MockDataService {
   // Mock Restaurants

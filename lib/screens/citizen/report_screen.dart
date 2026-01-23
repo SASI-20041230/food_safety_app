@@ -4,8 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:food_safety_app/providers/report_provider.dart';
-import 'package:food_safety_app/providers/auth_provider.dart';
+import 'package:food_guard/providers/report_provider.dart';
+import 'package:food_guard/providers/auth_provider.dart';
 
 class ReportScreen extends StatefulWidget {
   final String? restaurantId;

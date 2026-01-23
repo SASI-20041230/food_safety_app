@@ -5,6 +5,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/report_provider.dart';
 import '../../models/restaurant.dart';
 import 'report_screen.dart';
+import '../profile_screen.dart';
+import '../settings_screen.dart';
 
 class CitizenHomeScreen extends StatefulWidget {
   const CitizenHomeScreen({super.key});
@@ -53,10 +55,14 @@ class _CitizenHomeScreenState extends State<CitizenHomeScreen> {
             onSelected: (value) {
               switch (value) {
                 case 'profile':
-                  // Navigate to profile
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
                   break;
                 case 'settings':
-                  // Navigate to settings
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
                   break;
                 case 'logout':
                   _logout(context);
@@ -157,24 +163,39 @@ class _CitizenHomeScreenState extends State<CitizenHomeScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Quick Stats
-                Row(
-                  children: [
-                    _buildStatCard(
-                      context,
-                      'Reports Submitted',
-                      reportProvider.reports.length.toString(),
-                      Icons.report_outlined,
-                      const Color(0xFF10B981),
-                    ),
-                    const SizedBox(width: 16),
-                    _buildStatCard(
-                      context,
-                      'Restaurants',
-                      restaurantProvider.restaurants.length.toString(),
-                      Icons.restaurant_outlined,
-                      const Color(0xFFF59E0B),
-                    ),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
+                        SizedBox(
+                          width: constraints.maxWidth > 600
+                              ? (constraints.maxWidth - 16) / 2
+                              : constraints.maxWidth,
+                          child: _buildStatCard(
+                            context,
+                            'Reports Submitted',
+                            reportProvider.reports.length.toString(),
+                            Icons.report_outlined,
+                            const Color(0xFF10B981),
+                          ),
+                        ),
+                        SizedBox(
+                          width: constraints.maxWidth > 600
+                              ? (constraints.maxWidth - 16) / 2
+                              : constraints.maxWidth,
+                          child: _buildStatCard(
+                            context,
+                            'Restaurants',
+                            restaurantProvider.restaurants.length.toString(),
+                            Icons.restaurant_outlined,
+                            const Color(0xFFF59E0B),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),

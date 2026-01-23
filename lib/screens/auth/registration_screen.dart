@@ -575,6 +575,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             ),
                             TextButton(
                               onPressed: () {
+                                // Clear any existing errors before navigating back
+                                Provider.of<AuthProvider>(context, listen: false).clearError();
                                 Navigator.of(context).pop();
                               },
                               child: Text(

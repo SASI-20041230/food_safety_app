@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:food_safety_app/providers/auth_provider.dart';
-import 'package:food_safety_app/screens/auth/login_screen.dart';
-import 'package:food_safety_app/screens/citizen/home_screen.dart';
-import 'package:food_safety_app/screens/inspector/dashboard.dart';
-import 'package:food_safety_app/screens/admin/admin_dashboard.dart';
+import 'package:food_guard/providers/auth_provider.dart';
+import 'package:food_guard/screens/auth/login_screen.dart';
+import 'package:food_guard/screens/citizen/home_screen.dart';
+import 'package:food_guard/screens/inspector/dashboard.dart';
+import 'package:food_guard/screens/admin/admin_dashboard.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -98,7 +98,7 @@ class SplashScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 25,
                     spreadRadius: 3,
                   ),
@@ -135,7 +135,7 @@ class SplashScreen extends StatelessWidget {
               height: 80,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(40),
               ),
               child: const CircularProgressIndicator(

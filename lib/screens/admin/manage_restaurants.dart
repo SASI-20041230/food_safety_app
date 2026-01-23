@@ -3,20 +3,282 @@ import 'package:provider/provider.dart';
 import '../../models/restaurant.dart';
 import '../../providers/restaurant_provider.dart';
 
-class ManageRestaurantsScreen extends StatelessWidget {
+class ManageRestaurantsScreen extends StatefulWidget {
   const ManageRestaurantsScreen({super.key});
+
+  @override
+  State<ManageRestaurantsScreen> createState() => _ManageRestaurantsScreenState();
+}
+
+class _ManageRestaurantsScreenState extends State<ManageRestaurantsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _sortBy = 'name';
+  bool _isAscending = true;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final restaurantProvider = Provider.of<RestaurantProvider>(context);
-    
+
     return Scaffold(
-      body: ListView.builder(
-        itemCount: restaurantProvider.restaurants.length,
+      appBar: AppBar(
+        title: const Text('Manage Restaurants'),
+        backgroundColor: Colors.deepPurple,
+        elevation: 4,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => _refreshRestaurants(context),
+            tooltip: 'Refresh',
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Search and Filter Bar
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.grey[50],
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search restaurants...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.toLowerCase();
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Text('Sort by: ', style: TextStyle(fontWeight: FontWeight.w500)),
+                    DropdownButton<String>(
+                      value: _sortBy,
+                      items: const [
+                        DropdownMenuItem(value: 'name', child: Text('Name')),
+                        DropdownMenuItem(value: 'score', child: Text('Score')),
+                        DropdownMenuItem(value: 'date', child: Text('Date Added')),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _sortBy = value!;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 16),
+                    IconButton(
+                      icon: Icon(_isAscending ? Icons.arrow_upward : Icons.arrow_downward),
+                      onPressed: () {
+                        setState(() {
+                          _isAscending = !_isAscending;
+                        });
+                      },
+                      tooltip: _isAscending ? 'Sort Ascending' : 'Sort Descending',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Restaurant List
+          Expanded(
+            child: _buildRestaurantList(restaurantProvider),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showAddRestaurantDialog(context),
+        icon: const Icon(Icons.add_business),
+        label: const Text('Add Restaurant'),
+        backgroundColor: Colors.deepPurple,
+      ),
+    );
+  }
+
+  Widget _buildRestaurantList(RestaurantProvider restaurantProvider) {
+    final filteredRestaurants = _getFilteredAndSortedRestaurants(restaurantProvider.restaurants);
+
+    if (filteredRestaurants.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.restaurant, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              _searchQuery.isEmpty ? 'No restaurants found' : 'No restaurants match your search',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => _refreshRestaurants(context),
+      child: ListView.builder(
+        padding: const EdgeInsets.only(bottom: 80),
+        itemCount: filteredRestaurants.length,
         itemBuilder: (context, index) {
-          final restaurant = restaurantProvider.restaurants[index];
+          final restaurant = filteredRestaurants[index];
           return RestaurantListTile(restaurant: restaurant);
         },
+      ),
+    );
+  }
+
+  List<Restaurant> _getFilteredAndSortedRestaurants(List<Restaurant> restaurants) {
+    // Filter by search query
+    var filtered = restaurants.where((restaurant) {
+      return restaurant.name.toLowerCase().contains(_searchQuery) ||
+             restaurant.address.toLowerCase().contains(_searchQuery) ||
+             restaurant.phone.contains(_searchQuery);
+    }).toList();
+
+    // Sort
+    filtered.sort((a, b) {
+      int comparison = 0;
+      switch (_sortBy) {
+        case 'name':
+          comparison = a.name.compareTo(b.name);
+          break;
+        case 'score':
+          final aScore = a.lastInspectionScore ?? 0;
+          final bScore = b.lastInspectionScore ?? 0;
+          comparison = aScore.compareTo(bScore);
+          break;
+        case 'date':
+          comparison = a.createdAt.compareTo(b.createdAt);
+          break;
+      }
+      return _isAscending ? comparison : -comparison;
+    });
+
+    return filtered;
+  }
+
+  Future<void> _refreshRestaurants(BuildContext context) async {
+    // In a real app, this would fetch from API
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() {});
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Restaurants refreshed')),
+    );
+  }
+
+  void _showAddRestaurantDialog(BuildContext context) {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController addressController = TextEditingController();
+    final TextEditingController phoneController = TextEditingController();
+    final TextEditingController licenseController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add New Restaurant'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Restaurant Name *',
+                  hintText: 'Enter restaurant name',
+                ),
+                textCapitalization: TextCapitalization.words,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: addressController,
+                decoration: const InputDecoration(
+                  labelText: 'Address *',
+                  hintText: 'Enter full address',
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                  hintText: '+91 XXXXX XXXXX',
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: licenseController,
+                decoration: const InputDecoration(
+                  labelText: 'License Number *',
+                  hintText: 'FSSAI license number',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.trim().isEmpty ||
+                  addressController.text.trim().isEmpty ||
+                  licenseController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please fill in all required fields'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              final newRestaurant = Restaurant(
+                id: 'rest_${DateTime.now().millisecondsSinceEpoch}',
+                name: nameController.text.trim(),
+                address: addressController.text.trim(),
+                phone: phoneController.text.trim(),
+                licenseNumber: licenseController.text.trim(),
+                createdAt: DateTime.now(),
+                lastInspectionDate: null,
+                lastInspectionScore: null,
+                isActive: true,
+              );
+
+              Provider.of<RestaurantProvider>(context, listen: false)
+                  .addRestaurant(newRestaurant);
+
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${newRestaurant.name} added successfully'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: const Text('Add Restaurant'),
+          ),
+        ],
       ),
     );
   }
