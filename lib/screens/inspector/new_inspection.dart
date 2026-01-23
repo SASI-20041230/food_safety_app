@@ -32,8 +32,28 @@ class _NewInspectionScreenState extends State<NewInspectionScreen> {
   }
 
   void _loadInspectionData() {
-    // This would load existing inspection data
-    // For now, we'll just initialize empty responses
+    final inspectionProvider = Provider.of<InspectionProvider>(context, listen: false);
+    final inspection = inspectionProvider.getInspectionById(widget.inspectionId!);
+    
+    if (inspection != null) {
+      setState(() {
+        _selectedRestaurantId = inspection.restaurantId;
+        _notesController.text = inspection.notes ?? '';
+        // Load existing checklist responses from checklistItems
+        _checklistResponses = {};
+        _evidenceImages = {};
+        for (final item in inspection.checklistItems) {
+          _checklistResponses[item.id] = {
+            'compliance': item.compliance ?? '',
+            'comments': item.comments ?? '',
+            'evidence': item.evidenceImage,
+          };
+          if (item.evidenceImage != null && item.evidenceImage!.isNotEmpty) {
+            _evidenceImages[item.id] = File(item.evidenceImage!);
+          }
+        }
+      });
+    }
   }
 
   @override
@@ -64,7 +84,7 @@ class _NewInspectionScreenState extends State<NewInspectionScreen> {
   }
 
   Future<void> _submitInspection() async {
-    if (_selectedRestaurantId == null) {
+    if (widget.inspectionId == null && _selectedRestaurantId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select a restaurant'),
@@ -172,7 +192,7 @@ class _NewInspectionScreenState extends State<NewInspectionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Restaurant Selection
+            // Restaurant Selection/Details
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -192,31 +212,57 @@ class _NewInspectionScreenState extends State<NewInspectionScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: _selectedRestaurantId,
-                      decoration: const InputDecoration(
-                        labelText: 'Select Restaurant',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.restaurant),
+                    if (widget.inspectionId != null)
+                      // For existing inspections, show restaurant name as read-only
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.restaurant, color: Colors.grey),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                restaurants.firstWhere(
+                                  (r) => r.id == _selectedRestaurantId,
+                                  orElse: () => restaurants.first,
+                                ).name,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      // For new inspections, show dropdown
+                      DropdownButtonFormField<String>(
+                        value: _selectedRestaurantId,
+                        decoration: const InputDecoration(
+                          labelText: 'Select Restaurant',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.restaurant),
+                        ),
+                        items: restaurants.map((restaurant) {
+                          return DropdownMenuItem(
+                            value: restaurant.id,
+                            child: Text(restaurant.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedRestaurantId = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select a restaurant';
+                          }
+                          return null;
+                        },
                       ),
-                      items: restaurants.map((restaurant) {
-                        return DropdownMenuItem(
-                          value: restaurant.id,
-                          child: Text(restaurant.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedRestaurantId = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please select a restaurant';
-                        }
-                        return null;
-                      },
-                    ),
                   ],
                 ),
               ),

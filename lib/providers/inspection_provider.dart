@@ -217,6 +217,14 @@ class InspectionProvider with ChangeNotifier {
     return _inspections.where((i) => i.status == 'completed' || i.status == 'failed').toList();
   }
 
+  Inspection? getInspectionById(String inspectionId) {
+    try {
+      return _inspections.firstWhere((inspection) => inspection.id == inspectionId);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> updateChecklistItem(String inspectionId, String itemId, 
       String compliance, String? comments, String? evidenceImage) async {
     _isLoading = true;

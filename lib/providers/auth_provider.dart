@@ -205,7 +205,7 @@ class AuthProvider with ChangeNotifier {
     required String fullName,
     required String phoneNumber,
     required String registrationCode,
-    required String department,
+    String department = 'Food Safety Department',
     required String licenseNumber,
   }) async {
     _isLoading = true;
@@ -216,7 +216,7 @@ class AuthProvider with ChangeNotifier {
 
     // Validate input
     if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty || 
-        registrationCode.isEmpty || department.isEmpty || licenseNumber.isEmpty) {
+        registrationCode.isEmpty || licenseNumber.isEmpty) {
       _error = 'Please fill in all fields';
       _isLoading = false;
       notifyListeners();
@@ -249,10 +249,10 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
 
-    // Validate registration code (mock validation)
-    const validCodes = ['INSPECTOR2024', 'FSSAI2024', 'FOODSAFE2024'];
-    if (!validCodes.contains(registrationCode)) {
-      _error = 'Invalid registration code. Please contact FSSAI administration.';
+    // Validate FSSAI license number (14-digit number)
+    final licenseRegex = RegExp(r'^\d{14}$');
+    if (!licenseRegex.hasMatch(registrationCode)) {
+      _error = 'Please enter a valid 14-digit FSSAI license number';
       _isLoading = false;
       notifyListeners();
       return false;

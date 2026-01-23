@@ -386,57 +386,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _registrationCodeController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Registration Code',
-                                    prefixIcon: Icon(
-                                      Icons.vpn_key_outlined,
-                                      color: Color(0xFF94A3B8),
-                                    ),
-                                    hintText: 'Enter FSSAI registration code',
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Registration code is required for inspectors';
-                                    }
-                                    return null;
-                                  },
-                                ),
-
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _departmentController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Department',
-                                    prefixIcon: Icon(
-                                      Icons.business_outlined,
-                                      color: Color(0xFF94A3B8),
-                                    ),
-                                    hintText: 'e.g., Food Safety Department',
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Department is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
-
                                 const SizedBox(height: 16),
                                 TextFormField(
                                   controller: _licenseController,
                                   decoration: const InputDecoration(
-                                    labelText: 'License Number',
+                                    labelText: 'License/Registration No',
                                     prefixIcon: Icon(
                                       Icons.badge_outlined,
                                       color: Color(0xFF94A3B8),
                                     ),
-                                    hintText: 'FSSAI License Number',
+                                    hintText: '14-digit FSSAI License Number (e.g., 10012023000123)',
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'License number is required';
+                                      return 'License/Registration number is required';
                                     }
                                     return null;
                                   },
@@ -676,8 +639,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           password: _passwordController.text,
           fullName: _fullNameController.text.trim(),
           phoneNumber: _phoneController.text.trim(),
-          registrationCode: _registrationCodeController.text.trim(),
-          department: _departmentController.text.trim(),
+          registrationCode: _licenseController.text.trim(),
           licenseNumber: _licenseController.text.trim(),
         );
         break;
