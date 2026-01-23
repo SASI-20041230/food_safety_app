@@ -8,13 +8,13 @@ import 'package:food_safety_app/providers/report_provider.dart';
 import 'package:food_safety_app/providers/auth_provider.dart';
 
 class ReportScreen extends StatefulWidget {
-  final String restaurantId;
-  final String restaurantName;
+  final String? restaurantId;
+  final String? restaurantName;
 
   const ReportScreen({
     super.key,
-    required this.restaurantId,
-    required this.restaurantName,
+    this.restaurantId,
+    this.restaurantName,
   });
 
   @override
@@ -137,7 +137,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Report: ${widget.restaurantName}'),
+        title: Text(widget.restaurantName != null ? 'Report: ${widget.restaurantName}' : 'Report Issue'),
         backgroundColor: Colors.deepPurple,
       ),
       body: SingleChildScrollView(
@@ -403,11 +403,21 @@ class _ReportScreenState extends State<ReportScreen> {
                                                  'Anonymous';
                               final reporterId = currentUser?['id'] ?? 'unknown';
 
+                              if (widget.restaurantId == null || widget.restaurantName == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Please select a restaurant to report an issue.'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return;
+                              }
+
                               await reportProvider.createReport(
-                                restaurantId: widget.restaurantId,
+                                restaurantId: widget.restaurantId!,
                                 reporterId: reporterId,
                                 reporterName: reporterName, // Fixed: Added reporterName
-                                restaurantName: widget.restaurantName,
+                                restaurantName: widget.restaurantName!,
                                 title: _titleController.text,
                                 description: _descriptionController.text,
                                 type: _selectedType,

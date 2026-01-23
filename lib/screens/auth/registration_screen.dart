@@ -44,124 +44,167 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Register'),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Color(0xFF64748B),
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'Create Account',
+          style: TextStyle(
+            color: const Color(0xFF1E293B),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Inter',
+          ),
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo
+                // Header
                 Center(
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.restaurant_menu,
-                      size: 40,
-                      color: Colors.blue,
-                    ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF60A5FA), Color(0xFF2563EB)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF2563EB).withOpacity(0.3),
+                              blurRadius: 16,
+                              spreadRadius: 4,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.person_add,
+                          size: 36,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Join Food Safety Monitor',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Create your account to get started',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: const Color(0xFF64748B),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
 
-                const SizedBox(height: 20),
-
-                const Center(
-                  child: Text(
-                    'Join Food Safety Monitor',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                const Center(
-                  child: Text(
-                    'Create your account',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
+                const SizedBox(height: 32),
 
                 // Role Selection
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      _buildRoleButton('Citizen', Icons.person_outline),
+                      _buildRoleButton('Inspector', Icons.search),
+                      _buildRoleButton('Admin', Icons.admin_panel_settings_outlined),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Registration Form
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Select Role',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                        Text(
+                          'Account Information',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1E293B),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            _buildRoleButton('Citizen', Icons.person),
-                            const SizedBox(width: 10),
-                            _buildRoleButton('Inspector', Icons.search),
-                            const SizedBox(width: 10),
-                            _buildRoleButton('Admin', Icons.admin_panel_settings),
-                          ],
+                        const SizedBox(height: 8),
+                        Text(
+                          'Please fill in your details to create an account',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: const Color(0xFF64748B),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
 
-                const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                // Registration Form
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
                         // Error Message
                         if (authProvider.error != null)
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.red.shade200),
+                              color: const Color(0xFFFEE2E2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFFECACA),
+                                width: 1,
+                              ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error, color: Colors.red, size: 20),
-                                const SizedBox(width: 10),
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: Color(0xFFEF4444),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     authProvider.error!,
-                                    style: const TextStyle(color: Colors.red),
+                                    style: const TextStyle(
+                                      color: Color(0xFFDC2626),
+                                      fontSize: 14,
+                                      fontFamily: 'Inter',
+                                    ),
                                   ),
                                 ),
                               ],
@@ -175,8 +218,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           controller: _fullNameController,
                           decoration: const InputDecoration(
                             labelText: 'Full Name',
-                            prefixIcon: Icon(Icons.person),
-                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(
+                              Icons.person_outline,
+                              color: Color(0xFF94A3B8),
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -192,9 +237,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         TextFormField(
                           controller: _emailController,
                           decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email),
-                            border: OutlineInputBorder(),
+                            labelText: 'Email Address',
+                            prefixIcon: Icon(
+                              Icons.email_outlined,
+                              color: Color(0xFF94A3B8),
+                            ),
                           ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
@@ -215,8 +262,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           controller: _phoneController,
                           decoration: const InputDecoration(
                             labelText: 'Phone Number',
-                            prefixIcon: Icon(Icons.phone),
-                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(
+                              Icons.phone_outlined,
+                              color: Color(0xFF94A3B8),
+                            ),
                           ),
                           keyboardType: TextInputType.phone,
                           validator: (value) {
@@ -235,10 +284,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock),
+                            prefixIcon: const Icon(
+                              Icons.lock_outlined,
+                              color: Color(0xFF94A3B8),
+                            ),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: const Color(0xFF94A3B8),
                               ),
                               onPressed: () {
                                 setState(() {
@@ -246,7 +301,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 });
                               },
                             ),
-                            border: const OutlineInputBorder(),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -267,10 +321,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           obscureText: _obscureConfirmPassword,
                           decoration: InputDecoration(
                             labelText: 'Confirm Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: Color(0xFF94A3B8),
+                            ),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: const Color(0xFF94A3B8),
                               ),
                               onPressed: () {
                                 setState(() {
@@ -278,7 +338,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 });
                               },
                             ),
-                            border: const OutlineInputBorder(),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -293,101 +352,183 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                         // Inspector-specific fields
                         if (_selectedRole == 'inspector') ...[
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: _registrationCodeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Registration Code',
-                              prefixIcon: Icon(Icons.vpn_key),
-                              border: OutlineInputBorder(),
-                              hintText: 'Enter FSSAI registration code',
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF0F9FF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFBAE6FD),
+                                width: 1,
+                              ),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Registration code is required for inspectors';
-                              }
-                              return null;
-                            },
-                          ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.verified_user,
+                                      size: 20,
+                                      color: const Color(0xFF0369A1),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Inspector Verification',
+                                      style: TextStyle(
+                                        color: const Color(0xFF0369A1),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _registrationCodeController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Registration Code',
+                                    prefixIcon: Icon(
+                                      Icons.vpn_key_outlined,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                    hintText: 'Enter FSSAI registration code',
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Registration code is required for inspectors';
+                                    }
+                                    return null;
+                                  },
+                                ),
 
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: _departmentController,
-                            decoration: const InputDecoration(
-                              labelText: 'Department',
-                              prefixIcon: Icon(Icons.business),
-                              border: OutlineInputBorder(),
-                              hintText: 'e.g., Food Safety Department',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Department is required';
-                              }
-                              return null;
-                            },
-                          ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _departmentController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Department',
+                                    prefixIcon: Icon(
+                                      Icons.business_outlined,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                    hintText: 'e.g., Food Safety Department',
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Department is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
 
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: _licenseController,
-                            decoration: const InputDecoration(
-                              labelText: 'License Number',
-                              prefixIcon: Icon(Icons.badge),
-                              border: OutlineInputBorder(),
-                              hintText: 'FSSAI License Number',
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _licenseController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'License Number',
+                                    prefixIcon: Icon(
+                                      Icons.badge_outlined,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                    hintText: 'FSSAI License Number',
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'License number is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'License number is required';
-                              }
-                              return null;
-                            },
                           ),
                         ],
 
                         // Admin-specific fields
                         if (_selectedRole == 'admin') ...[
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: _registrationCodeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Admin Code',
-                              prefixIcon: Icon(Icons.admin_panel_settings),
-                              border: OutlineInputBorder(),
-                              hintText: 'Enter admin registration code',
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF0F9FF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFBAE6FD),
+                                width: 1,
+                              ),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Admin code is required';
-                              }
-                              return null;
-                            },
-                          ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.admin_panel_settings,
+                                      size: 20,
+                                      color: const Color(0xFF0369A1),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Admin Verification',
+                                      style: TextStyle(
+                                        color: const Color(0xFF0369A1),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _registrationCodeController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Admin Code',
+                                    prefixIcon: Icon(
+                                      Icons.admin_panel_settings_outlined,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                    hintText: 'Enter admin registration code',
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Admin code is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
 
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            controller: _organizationController,
-                            decoration: const InputDecoration(
-                              labelText: 'Organization',
-                              prefixIcon: Icon(Icons.business),
-                              border: OutlineInputBorder(),
-                              hintText: 'Government/Organization Name',
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _organizationController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Organization',
+                                    prefixIcon: Icon(
+                                      Icons.business_outlined,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                    hintText: 'Government/Organization Name',
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Organization is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Organization is required';
-                              }
-                              return null;
-                            },
                           ),
                         ],
 
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 32),
 
                         // Register Button
                         SizedBox(
                           width: double.infinity,
-                          height: 50,
+                          height: 56,
                           child: ElevatedButton.icon(
                             onPressed: authProvider.isLoading ? null : _register,
                             icon: authProvider.isLoading
@@ -399,30 +540,52 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                     ),
                                   )
-                                : const Icon(Icons.person_add),
+                                : const Icon(Icons.person_add, size: 20),
                             label: Text(
-                              authProvider.isLoading ? 'Registering...' : 'Register as ${_selectedRole[0].toUpperCase()}${_selectedRole.substring(1)}',
+                              authProvider.isLoading
+                                  ? 'Creating Account...'
+                                  : 'Create ${_selectedRole[0].toUpperCase()}${_selectedRole.substring(1)} Account',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Inter',
+                              ),
                             ),
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
                         // Login Link
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Already have an account?'),
+                            Text(
+                              'Already have an account?',
+                              style: TextStyle(
+                                color: const Color(0xFF64748B),
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              child: const Text('Login'),
+                              child: Text(
+                                'Sign In',
+                                style: TextStyle(
+                                  color: const Color(0xFF2563EB),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -451,27 +614,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isSelected ? Colors.blue : Colors.grey.shade300,
-              width: isSelected ? 2 : 1,
-            ),
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF2563EB).withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Column(
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.blue : Colors.grey,
+                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
                 size: 24,
               ),
               const SizedBox(height: 4),
               Text(
                 role,
                 style: TextStyle(
-                  color: isSelected ? Colors.blue : Colors.grey,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   fontSize: 12,
+                  fontFamily: 'Inter',
                 ),
               ),
             ],
@@ -527,7 +696,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Successfully registered as ${_selectedRole}!'),
-          backgroundColor: Colors.green,
+          backgroundColor: const Color(0xFF10B981),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       Navigator.of(context).pop(); // Go back to login

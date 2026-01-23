@@ -32,15 +32,255 @@ class MyApp extends StatelessWidget {
       title: 'Food Safety Monitor',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple, // Changed to match admin theme
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          elevation: 4,
-          centerTitle: true,
-          backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.white,
+        primaryColor: const Color(0xFF2563EB), // Modern blue
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC), // Light gray background
+        fontFamily: 'Inter', // Modern font family
+
+        // Color scheme
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF2563EB),
+          secondary: Color(0xFF10B981), // Emerald green
+          tertiary: Color(0xFFF59E0B), // Amber
+          surface: Colors.white,
+          background: Color(0xFFF8FAFC),
+          error: Color(0xFFEF4444),
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: Color(0xFF1E293B),
+          onBackground: Color(0xFF1E293B),
         ),
-        scaffoldBackgroundColor: Colors.grey[50],
+
+        // App bar theme
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          foregroundColor: Color(0xFF1E293B),
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+        ),
+
+        // Card theme
+        cardTheme: CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: Colors.white,
+          shadowColor: Colors.black.withOpacity(0.08),
+          surfaceTintColor: Colors.transparent,
+        ),
+
+        // Button themes
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            backgroundColor: const Color(0xFF2563EB),
+            foregroundColor: Colors.white,
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+
+        // Input decoration theme
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFF1F5F9),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          hintStyle: TextStyle(
+            color: Colors.grey[500],
+            fontSize: 16,
+            fontFamily: 'Inter',
+          ),
+          labelStyle: const TextStyle(
+            color: Color(0xFF64748B),
+            fontSize: 16,
+            fontFamily: 'Inter',
+          ),
+        ),
+
+        // Text themes
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+          displayMedium: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+          displaySmall: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+          headlineLarge: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+          headlineMedium: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+          headlineSmall: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+          titleLarge: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+          titleMedium: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF475569),
+            fontFamily: 'Inter',
+          ),
+          titleSmall: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF64748B),
+            fontFamily: 'Inter',
+          ),
+          bodyLarge: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF1E293B),
+            fontFamily: 'Inter',
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF475569),
+            fontFamily: 'Inter',
+          ),
+          bodySmall: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF64748B),
+            fontFamily: 'Inter',
+          ),
+        ),
+
+        // Bottom navigation bar theme
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          selectedItemColor: Color(0xFF2563EB),
+          unselectedItemColor: Color(0xFF94A3B8),
+          selectedLabelStyle: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Inter',
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Inter',
+          ),
+          elevation: 8,
+          type: BottomNavigationBarType.fixed,
+        ),
+
+        // Floating action button theme
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFF2563EB),
+          foregroundColor: Colors.white,
+          elevation: 6,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+        ),
+
+        // Chip theme
+        chipTheme: ChipThemeData(
+          backgroundColor: const Color(0xFFF1F5F9),
+          selectedColor: const Color(0xFF2563EB).withOpacity(0.1),
+          checkmarkColor: const Color(0xFF2563EB),
+          deleteIconColor: const Color(0xFFEF4444),
+          labelStyle: const TextStyle(
+            color: Color(0xFF475569),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Inter',
+          ),
+          secondaryLabelStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Inter',
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+
+        // Dialog theme
+        dialogTheme: DialogThemeData(
+          backgroundColor: Colors.white,
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+
+        // SnackBar theme
+        snackBarTheme: const SnackBarThemeData(
+          backgroundColor: Color(0xFF1E293B),
+          contentTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Inter',
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
       ),
       home: const AppWrapper(),
       routes: {
@@ -62,51 +302,73 @@ class AppWrapper extends StatelessWidget {
     
     if (authProvider.isLoading) {
       return Scaffold(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color(0xFF2563EB),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Modern logo with gradient
               Container(
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF60A5FA), Color(0xFF2563EB)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      spreadRadius: 2,
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 24,
+                      spreadRadius: 4,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
                 child: const Icon(
                   Icons.restaurant_menu,
                   size: 60,
-                  color: Colors.deepPurple,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 32),
               const Text(
                 'Food Safety Monitor',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Inter',
+                  letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               const Text(
-                'Loading...',
+                'Ensuring safe food for everyone',
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
                 ),
               ),
-              const SizedBox(height: 40),
-              const CircularProgressIndicator(
-                color: Colors.white,
+              const SizedBox(height: 48),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 3,
+                  ),
+                ),
               ),
             ],
           ),
