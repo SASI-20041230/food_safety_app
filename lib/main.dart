@@ -9,7 +9,8 @@ import 'package:food_guard/providers/activity_provider.dart';
 import 'package:food_guard/screens/auth/login_screen.dart';
 import 'package:food_guard/screens/citizen/home_screen.dart';
 import 'package:food_guard/screens/inspector/dashboard.dart';
-import 'package:food_guard/screens/admin/admin_dashboard.dart'; // Add this import
+import 'package:food_guard/screens/admin/admin_dashboard.dart';
+import 'package:food_guard/app.dart';
 
 void main() {
   // Initialize providers
@@ -25,7 +26,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => InspectionProvider()),
         ChangeNotifierProvider(create: (_) => ActivityProvider()),
       ],
-      child: const MyApp(),
+      child: const App(),
     ),
   );
 }
@@ -292,7 +293,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/citizen': (context) => const CitizenHomeScreen(),
         '/inspector': (context) => const InspectorDashboard(),
-        '/admin': (context) => const AdminDashboard(),
+        '/admin': (context) => AdminDashboard(),
       },
     );
   }
@@ -304,6 +305,7 @@ class AppWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    print('DEBUG: AppWrapper build - isLoading: ${authProvider.isLoading}, isAuthenticated: ${authProvider.isAuthenticated}, userRole: ${authProvider.userRole}');
     
     if (authProvider.isLoading) {
       return Scaffold(
@@ -388,11 +390,14 @@ class AppWrapper extends StatelessWidget {
     // Route based on role
     switch (authProvider.userRole) {
       case 'inspector':
+        print('DEBUG: Routing to InspectorDashboard');
         return const InspectorDashboard();
       case 'admin':
-        return const AdminDashboard(); // Now using the real AdminDashboard
+        print('DEBUG: Routing to AdminDashboard');
+        return AdminDashboard(); // Now using the real AdminDashboard
       case 'citizen':
       default:
+        print('DEBUG: Routing to CitizenHomeScreen');
         return const CitizenHomeScreen();
     }
   }

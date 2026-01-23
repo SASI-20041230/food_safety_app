@@ -26,6 +26,7 @@ class _InspectorDashboardState extends State<InspectorDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    print('DEBUG: InspectorDashboard build method called');
     final inspectionProvider = Provider.of<InspectionProvider>(context);
     final reportProvider = Provider.of<ReportProvider>(context);
     

@@ -47,23 +47,31 @@ class App extends StatelessWidget {
       ),
       home: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
+          print('DEBUG: App.dart Consumer - isLoading: ${authProvider.isLoading}, isAuthenticated: ${authProvider.isAuthenticated}, userRole: ${authProvider.userRole}');
+          
           if (authProvider.isLoading) {
+            print('DEBUG: Showing SplashScreen');
             return const SplashScreen();
           }
           
           if (!authProvider.isAuthenticated) {
+            print('DEBUG: Showing LoginScreen');
             return const LoginScreen();
           }
           
           // Route based on user role
           switch (authProvider.userRole) {
             case 'citizen':
+              print('DEBUG: Routing to CitizenHomeScreen');
               return const CitizenHomeScreen();
             case 'inspector':
+              print('DEBUG: Routing to InspectorDashboard');
               return const InspectorDashboard();
             case 'admin':
-              return const AdminDashboard();
+              print('DEBUG: Routing to AdminDashboard');
+              return AdminDashboard();
             default:
+              print('DEBUG: Default routing to LoginScreen');
               return const LoginScreen();
           }
         },

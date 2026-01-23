@@ -1,6 +1,17 @@
-# 🛡️ Food Guard
+# 🛡️ Food Safety App
 
 A comprehensive Flutter application designed to ensure food safety compliance through citizen reporting and professional inspections. This app empowers citizens to report food safety violations and enables inspectors to conduct thorough assessments using AI-powered analysis.
+
+## 🎉 **Latest Update: Mobile APK Ready!**
+
+✅ **Production APK Available**: `build/app/outputs/flutter-apk/app-release.apk` (49.4MB)  
+✅ **Android 5.0+ Compatible**: Ready for mobile installation  
+✅ **Complete Features**: Restaurant ratings, inspections, citizen reports  
+✅ **Production Ready**: Optimized release build with all fixes applied  
+
+**Quick Start**: Download the APK and install on your Android device for the full food safety experience!
+
+---
 
 ## 📋 Table of Contents
 
@@ -67,38 +78,47 @@ A comprehensive Flutter application designed to ensure food safety compliance th
 
 ## 🚀 Recent Enhancements
 
-### Version 1.1.0 - Authentication & UI Improvements
+### Version 1.2.0 - Complete Mobile App with APK Deployment
 
-#### 🔐 Enhanced Authentication System
-- **Proper Authentication Logic**: Replaced mock authentication with real credential validation
-- **Persistent User Storage**: Users are now stored locally using SharedPreferences
-- **Input Validation**: Added comprehensive validation for emails, passwords, and phone numbers
-- **Password Security**: Minimum password length requirements and secure storage
-- **Role-Based Validation**: Ensures users can only access their designated role dashboards
+#### ⭐ **APK Build & Mobile Deployment**
+- **Release APK Generated**: Successfully built production-ready APK (49.4MB)
+- **Mobile Installation**: Ready for Android devices (API 21+)
+- **Optimized Performance**: Release build with tree-shaking and minification
+- **Cross-Platform Ready**: Built for Android with iOS/Web compatibility
 
-#### 👤 Profile Management
-- **Universal Profile Screen**: Single, responsive profile screen for all user roles
-- **Editable Profiles**: Users can update their personal and professional information
-- **Role-Specific Fields**: Different fields displayed based on user role (citizen/inspector/admin)
-- **Account Information**: Display account status, verification status, and registration date
-- **Responsive Design**: Profile screen adapts to different screen sizes
+#### 👥 **Enhanced Citizen Features**
+- **Restaurant Rating System**: Complete 5-star rating and review functionality
+- **Advanced Report Submission**: Multi-image upload with camera/gallery support
+- **Real-time Location Tracking**: GPS-based accurate reporting
+- **Report Status Tracking**: Live updates on submitted reports
+- **User Profile Management**: Complete profile editing with photo upload
 
-#### 📱 UI/UX Improvements
-- **Responsive Dashboards**: Improved responsiveness across all dashboard screens
-- **Enhanced Login Screen**: Clean authentication interface without demo credentials
-- **Consistent Navigation**: Profile access from all dashboard menu options
-- **Improved Error Handling**: Better error messages and user feedback
-- **Cross-Platform Compatibility**: Optimized for mobile, tablet, and web platforms
+#### 🔍 **Inspector Dashboard Improvements**
+- **Smart Inspection Workflow**: Conditional restaurant selection for new vs existing inspections
+- **Completed Inspection Details**: Clickable completed inspections with detailed view
+- **Enhanced Report Review**: Fixed image display for citizen reports (local files + URLs)
+- **Comprehensive Checklist System**: FSSAI-compliant inspection checklists
+- **Professional Scoring**: Automated compliance scoring and risk assessment
 
-#### 🏢 Admin Dashboard Enhancements
-- **Real-time Updates**: Live data synchronization across all dashboards (30-second intervals)
-- **Enhanced Restaurant Management**: Add new restaurants with comprehensive form validation
-- **Advanced Search & Filtering**: Search restaurants by name, address, or phone with sorting options
-- **System Activity Monitoring**: Real-time activity feed showing all system events
-- **Comprehensive System Settings**: Configure notifications, AI analysis, data retention, and system maintenance
-- **Fixed Report Analytics**: Corrected pending reports count to match across all dashboards
-- **System Health Monitoring**: Real-time system status and performance metrics
-- **Data Management Tools**: Cache clearing, data export, and system maintenance features
+#### 🏢 **Restaurant Management System**
+- **Restaurant Profiles**: Detailed information with ratings and reviews
+- **Inspection History**: Complete audit trail of all inspections
+- **Risk Assessment**: Automated risk scoring based on compliance
+- **Search & Filtering**: Advanced restaurant discovery features
+
+#### 📱 **UI/UX Enhancements**
+- **Material Design 3**: Modern, responsive interface
+- **Cross-Platform Compatibility**: Optimized for mobile, tablet, and desktop
+- **Improved Navigation**: Intuitive bottom navigation with role-based access
+- **Error Handling**: Comprehensive error messages and user feedback
+- **Loading States**: Professional loading indicators and progress feedback
+
+#### 🔧 **Technical Improvements**
+- **State Management**: Robust Provider-based state management
+- **Local Storage**: SharedPreferences for persistent data
+- **Image Handling**: Support for both local files and network images
+- **Form Validation**: Comprehensive input validation with custom validators
+- **API Integration**: RESTful API architecture with error handling
 
 ## 🛠️ Tech Stack
 
@@ -161,13 +181,37 @@ A comprehensive Flutter application designed to ensure food safety compliance th
 
 ## 🚀 Installation
 
-### Prerequisites
+### 📱 **Mobile APK Installation (Recommended)**
+
+The app is now available as a production-ready APK for Android devices:
+
+#### **APK Download & Installation:**
+1. **Locate the APK file**: `build/app/outputs/flutter-apk/app-release.apk`
+2. **Transfer to Android device**: Copy the APK to your Android phone via USB, email, or cloud storage
+3. **Enable Unknown Sources**:
+   - Go to **Settings > Security** (or **Privacy** on Android 12+)
+   - Enable **"Install unknown apps"** or **"Install apps from unknown sources"**
+4. **Install the APK**:
+   - Open file manager and navigate to the APK
+   - Tap `app-release.apk` to install
+   - Follow installation prompts
+5. **Launch the app**: Find "Food Safety App" in your app drawer
+
+#### **System Requirements:**
+- **Android Version**: 5.0 (API 21) or higher
+- **Storage**: ~100MB free space
+- **Permissions**: Camera, Storage, Location (optional)
+
+### 💻 **Development Setup**
+
+#### Prerequisites
 - Flutter SDK (3.0 or higher)
 - Dart SDK (3.0 or higher)
 - Android Studio / VS Code
 - Git
+- Android SDK (for Android development)
 
-### Setup Instructions
+#### Setup Instructions
 
 1. **Clone the repository**
    ```bash
@@ -184,7 +228,7 @@ A comprehensive Flutter application designed to ensure food safety compliance th
 
    **For Android:**
    - Ensure Android SDK is properly configured
-   - Add camera permissions in `android/app/src/main/AndroidManifest.xml`
+   - Add required permissions in `android/app/src/main/AndroidManifest.xml`
 
    **For iOS:**
    - Open `ios/Runner.xcworkspace` in Xcode
@@ -202,11 +246,18 @@ A comprehensive Flutter application designed to ensure food safety compliance th
    flutter run -d chrome
    ```
 
-### Build Instructions
+### 🏗️ **Build Instructions**
 
-**Android APK:**
+**Android APK (Release Build):**
 ```bash
 flutter build apk --release
+# Output: build/app/outputs/flutter-apk/app-release.apk
+```
+
+**Android App Bundle (AAB):**
+```bash
+flutter build appbundle --release
+# Output: build/app/outputs/bundle/release/app-release.aab
 ```
 
 **iOS App Store:**
@@ -219,82 +270,144 @@ flutter build ios --release
 flutter build web --release
 ```
 
+## 📦 **APK Information**
+
+### **Current Release: Version 1.2.0**
+- **File Size**: 49.4MB
+- **Build Type**: Release APK (Optimized)
+- **Supported Platforms**: Android 5.0+ (API 21+)
+- **Build Date**: January 24, 2026
+
+### **APK Features**
+✅ **Complete Citizen Experience**
+- Restaurant rating and review system
+- Multi-image violation reporting
+- GPS location tracking
+- Report status monitoring
+
+✅ **Full Inspector Dashboard**
+- Professional inspection checklists
+- Completed inspection details view
+- Citizen report review with images
+- FSSAI compliance scoring
+
+✅ **Production Ready**
+- Optimized performance
+- Secure data handling
+- Offline capabilities
+- Cross-platform compatibility
+
+### **APK File Location**
+```
+food_safety_app/
+└── build/
+    └── app/
+        └── outputs/
+            └── flutter-apk/
+                ├── app-release.apk (49.4MB)
+                └── app-release.apk.sha1
+```
+
 ## 📖 Usage
 
-### Getting Started
-1. **Launch the App**: Open the app on your device
-2. **Select User Role**: Choose between Citizen, Inspector, or Admin
-3. **Register or Login**: Create a new account or login with existing credentials
+### 🚀 **Getting Started with Mobile APK**
 
-### For Citizens
-1. **Register/Login**: Create an account or login with existing credentials
-2. **Browse Restaurants**: Find restaurants in your area
-3. **Submit Reports**: Take photos and describe violations
-4. **Track Progress**: Monitor report status and inspector responses
-5. **Manage Profile**: Update personal information, set profile photo, and view account details
-6. **App Settings**: Configure notifications, language, and other preferences
+1. **Install the APK** on your Android device (see Installation section)
+2. **Launch the App**: Tap the "Food Safety App" icon
+3. **Select User Role**: Choose between Citizen, Inspector
+4. **Register/Login**: Create account or login with existing credentials
 
-### For Inspectors
-1. **Login**: Access inspector dashboard with inspector credentials
-2. **Review Reports**: Analyze citizen-submitted reports
-3. **Conduct Inspections**: Use checklists for professional assessments
-4. **AI Analysis**: Utilize automated image analysis
-5. **Generate Reports**: Create detailed compliance reports
-6. **Update Profile**: Manage professional details, license info, and profile photo
-7. **App Settings**: Configure notifications and preferences
+### 👥 **For Citizens (Mobile App)**
 
-### For Admins
-1. **Login**: Access admin dashboard with admin credentials
-2. **User Management**: View and manage all registered users
-3. **Restaurant Oversight**: Monitor restaurant registrations and compliance
-4. **Report Analytics**: Review comprehensive food safety analytics
-5. **System Administration**: Full system control and configuration
-6. **Profile Management**: Update administrative information and profile photo
-7. **App Settings**: Configure notifications and preferences
+#### **Restaurant Discovery & Rating**
+- **Browse Restaurants**: View restaurants with ratings and reviews
+- **Rate & Review**: Submit 5-star ratings with detailed feedback
+- **Search & Filter**: Find restaurants by location, cuisine, or rating
+
+#### **Report Violations**
+- **Quick Reporting**: Capture photos of violations with camera
+- **Detailed Reports**: Add descriptions, locations, and multiple images
+- **Anonymous Option**: Report without personal information
+- **Track Progress**: Monitor report status and inspector responses
+
+#### **Profile & Settings**
+- **Manage Profile**: Update personal information and profile photo
+- **App Preferences**: Configure notifications and app settings
+- **Account Security**: Secure login with persistent sessions
+
+### 🔍 **For Inspectors (Mobile App)**
+
+#### **Dashboard Overview**
+- **Pending Inspections**: View assigned inspections with restaurant details
+- **Completed History**: Access past inspections with detailed results
+- **Quick Actions**: Start new inspections or review completed ones
+
+#### **Inspection Management**
+- **Smart Workflow**: Restaurant selection only for new inspections
+- **Comprehensive Checklists**: FSSAI-compliant inspection categories
+- **Evidence Collection**: Capture photos during inspections
+- **Real-time Scoring**: Automated compliance scoring
+
+#### **Citizen Report Review**
+- **Report Analysis**: View citizen reports with images
+- **AI Integration**: Access AI-powered analysis (when available)
+- **Status Updates**: Approve, reject, or mark reports as resolved
+
+#### **Professional Tools**
+- **License Management**: FSSAI license validation and updates
+- **Report Generation**: Create detailed inspection reports
+- **Data Export**: Export inspection data for records
 
 ## 🏗️ Project Structure
 
 ```
-food_guard/
-├── android/                 # Android platform code
-├── ios/                     # iOS platform code
-├── lib/                     # Main Flutter application
-│   ├── models/             # Data models
-│   │   ├── inspection.dart
-│   │   ├── report.dart
-│   │   ├── restaurant.dart
-│   │   └── user.dart
-│   ├── providers/          # State management
-│   │   ├── auth_provider.dart      # Authentication & user management
-│   │   ├── inspection_provider.dart
-│   │   ├── report_provider.dart
-│   │   └── restaurant_provider.dart
-│   ├── screens/            # UI screens
-│   │   ├── auth/           # Authentication screens
+food_safety_app/
+├── android/                    # Android platform code & build files
+│   ├── app/
+│   │   ├── build.gradle.kts
+│   │   └── src/main/AndroidManifest.xml
+│   └── gradle/wrapper/
+├── ios/                        # iOS platform code
+├── lib/                        # Main Flutter application
+│   ├── config/
+│   │   └── constants.dart      # App constants and configuration
+│   ├── models/                 # Data models
+│   │   ├── inspection.dart     # Inspection data structure
+│   │   ├── rating.dart         # Restaurant rating model
+│   │   ├── report.dart         # Citizen report model
+│   │   ├── restaurant.dart     # Restaurant information
+│   │   └── user.dart           # User authentication model
+│   ├── providers/              # State management (Provider pattern)
+│   │   ├── auth_provider.dart         # Authentication & user management
+│   │   ├── inspection_provider.dart   # Inspection workflow management
+│   │   ├── rating_provider.dart       # Restaurant rating system
+│   │   ├── report_provider.dart       # Citizen reports management
+│   │   └── restaurant_provider.dart   # Restaurant data management
+│   ├── screens/                # UI screens organized by user role
+│   │   ├── auth/               # Authentication screens
 │   │   │   ├── login_screen.dart
 │   │   │   └── registration_screen.dart
-│   │   ├── citizen/        # Citizen user interface
-│   │   │   ├── home_screen.dart
-│   │   │   └── report_screen.dart
-│   │   ├── inspector/      # Inspector dashboard
-│   │   │   ├── dashboard.dart
-│   │   │   ├── checklist_screen.dart
-│   │   │   └── new_inspection.dart
-│   │   ├── admin/          # Admin interface
-│   │   │   ├── admin_dashboard.dart
-│   │   │   ├── manage_restaurants.dart
-│   │   │   ├── review_reports.dart
-│   │   │   └── user_management.dart
-│   │   ├── profile_screen.dart     # Universal profile management
-│   │   └── settings_screen.dart    # App settings and preferences
-│   ├── services/           # API and utility services
-│   │   ├── api_service.dart
-│   │   └── mock_data.dart
-│   └── config/             # Configuration files
-│       └── constants.dart
-├── test/                   # Unit and widget tests
-├── web/                    # Web platform files
-└── pubspec.yaml           # Flutter dependencies
+│   │   ├── citizen/            # Citizen user interface
+│   │   │   ├── dashboard.dart         # Citizen home with ratings
+│   │   │   ├── restaurant_details.dart # Restaurant info & reviews
+│   │   │   └── report_screen.dart     # Violation reporting
+│   │   ├── inspector/          # Inspector dashboard & tools
+│   │   │   ├── dashboard.dart         # Main inspector interface
+│   │   │   ├── new_inspection.dart    # Inspection creation/completion
+│   │   │   └── inspection_details.dart # Completed inspection viewer
+│   │   ├── profile_screen.dart        # Universal profile management
+│   │   └── settings_screen.dart       # App settings & preferences
+│   └── services/              # API and utility services
+│       ├── api_service.dart   # REST API communication
+│       └── mock_data.dart     # Sample data for development
+├── test/                      # Unit and widget tests
+├── web/                       # Web platform files
+├── build/                     # Build outputs
+│   └── app/outputs/flutter-apk/
+│       └── app-release.apk    # 📱 Production APK (49.4MB)
+├── analysis_options.yaml      # Dart/Flutter analysis configuration
+├── pubspec.yaml              # Flutter dependencies & assets
+└── README.md                 # 📖 This documentation
 ```
 
 ## 🔌 API Integration
@@ -315,6 +428,25 @@ The app integrates with the following APIs:
 - **Firebase Auth**: User authentication and authorization
 - **Role-based Access**: Different permissions for citizens, inspectors, and admins
 
+## 🚀 Deployment
+
+### **Mobile App Deployment**
+- **APK Status**: ✅ Production-ready APK built and tested
+- **File Location**: `build/app/outputs/flutter-apk/app-release.apk`
+- **Size**: 49.4MB (optimized release build)
+- **Supported Devices**: Android 5.0+ (API 21+)
+
+### **Distribution Options**
+- **Direct APK**: Share APK file via email, cloud storage, or direct transfer
+- **Google Play Store**: Ready for Play Store submission (AAB format available)
+- **Enterprise Distribution**: Suitable for internal company distribution
+
+### **Installation Instructions for Users**
+1. Download the APK file to your Android device
+2. Enable "Install unknown apps" in device settings
+3. Open the APK file and follow installation prompts
+4. Launch the app and enjoy the full food safety experience!
+
 ## 🤝 Contributing
 
 We welcome contributions! Please follow these steps:
@@ -326,10 +458,11 @@ We welcome contributions! Please follow these steps:
 5. Open a Pull Request
 
 ### Development Guidelines
-- Follow Flutter best practices
-- Write comprehensive tests
-- Update documentation
-- Ensure cross-platform compatibility
+- Follow Flutter best practices and Material Design 3 guidelines
+- Write comprehensive tests for new features
+- Update documentation for any changes
+- Ensure cross-platform compatibility (Android/iOS/Web)
+- Test on multiple screen sizes and orientations
 
 ## 📄 License
 
@@ -339,16 +472,23 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Project Developer**: SASI
 - **GitHub**: [@SASI-20041230](https://github.com/SASI-20041230)
-- **Email**: [your-email@example.com]
-- **LinkedIn**: [Your LinkedIn Profile]
+- **Repository**: [Food Safety App](https://github.com/SASI-20041230/food_safety_app)
+- **Version**: 1.2.0 (January 24, 2026)
 
-### Support
-- Create an issue on GitHub for bug reports
-- Use discussions for questions and feature requests
-- Check the documentation for common solutions
+### Support & Issues
+- 🐛 **Bug Reports**: Create an issue on GitHub
+- 💡 **Feature Requests**: Use GitHub Discussions
+- 📧 **General Questions**: Check documentation or create discussions
+- 📱 **Mobile App Issues**: Test with the latest APK release
+
+### **APK Download**
+The latest APK is available in the `build/app/outputs/flutter-apk/` directory after running:
+```bash
+flutter build apk --release
+```
 
 ---
 
 ⭐ **Star this repository** if you find it helpful!
 
-**Made with ❤️ for Food Safety**
+**Made with ❤️ for Food Safety - Now Available on Mobile!** 📱
