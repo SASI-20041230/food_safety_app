@@ -11,12 +11,44 @@ import 'package:food_guard/screens/citizen/home_screen.dart';
 import 'package:food_guard/screens/inspector/dashboard.dart';
 import 'package:food_guard/screens/admin/admin_dashboard.dart';
 import 'package:food_guard/app.dart';
+import 'package:food_guard/services/supabase_service.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Supabase
+  await SupabaseService.init();
+
   // Initialize providers
   final ratingProvider = RatingProvider();
+
+  // Debug: remove local user 'jaswanth' from SharedPreferences when running in debug
+  if (kDebugMode) {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      print('DEBUG: SharedPreferences keys before cleanup: ${prefs.getKeys()}');
+      final usersJson = prefs.getString('users');
+      if (usersJson != null) {
+        final List users = jsonDecode(usersJson) as List;
+        final before = users.length;
+        users.removeWhere((u) => (u is Map && (u['email'] == 'jaswanth@gmail.com' || u['email'] == 'jaswanth@gmail.com')));
+        final after = users.length;
+        if (after != before) {
+          await prefs.setString('users', jsonEncode(users));
+          print('DEBUG: Removed jaswanth from local users (removed ${before - after}).');
+        } else {
+          print('DEBUG: jaswanth not found in local users.');
+        }
+      } else {
+        print('DEBUG: No "users" key in SharedPreferences.');
+      }
+    } catch (e) {
+      print('DEBUG: Failed to cleanup SharedPreferences: $e');
+    }
+  }
 
   runApp(
     MultiProvider(

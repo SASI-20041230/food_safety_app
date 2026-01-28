@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:food_guard/services/supabase_service.dart';
+import 'package:food_guard/config/constants.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   Map<String, dynamic>? _user;
   String? _error;
   List<Map<String, dynamic>> _allUsers = [];
-  SharedPreferences? _prefs;
+
+  // Development mode flag - set to true to bypass email confirmation
+  static const bool _isDevelopmentMode = true;
 
   bool get isLoading => _isLoading;
   Map<String, dynamic>? get user => _user;
@@ -20,31 +23,65 @@ class AuthProvider with ChangeNotifier {
   Map<String, dynamic>? get currentUser => _user;
 
   AuthProvider() {
-    _initPrefs();
+    _initAuth();
   }
 
-  Future<void> _initPrefs() async {
-    _prefs = await SharedPreferences.getInstance();
-    await _loadUsers();
-  }
+  Future<void> _initAuth() async {
+    // Listen to auth state changes
+    SupabaseService.client.auth.onAuthStateChange.listen((event) {
+      if (event.event == AuthChangeEvent.signedIn) {
+        _loadUserProfile();
+      } else if (event.event == AuthChangeEvent.signedOut) {
+        _user = null;
+        notifyListeners();
+      }
+    });
 
-  Future<void> _loadUsers() async {
-    if (_prefs == null) return;
-
-    final usersJson = _prefs!.getString('users');
-    if (usersJson != null) {
-      final List<dynamic> usersList = json.decode(usersJson);
-      _allUsers = usersList.map((user) => Map<String, dynamic>.from(user)).toList();
+    // Check if user is already signed in
+    final currentUser = SupabaseService.client.auth.currentUser;
+    if (currentUser != null) {
+      await _loadUserProfile();
     }
-    // No demo users initialization - start with empty user list
-    notifyListeners();
   }
 
-  Future<void> _saveUsers() async {
-    if (_prefs == null) return;
+  Future<void> _confirmUserEmail(String userId) async {
+    try {
+      // Use admin client to confirm the user's email
+      await SupabaseService.adminClient.auth.admin.updateUserById(
+        userId,
+        attributes: AdminUserAttributes(emailConfirm: true),
+      );
+    } catch (e) {
+      // If admin confirmation fails, we'll rely on the user being able to login
+      // This might happen if service role key is not set properly
+      print('Admin confirmation failed: $e');
+    }
+  }
 
-    final usersJson = json.encode(_allUsers);
-    await _prefs!.setString('users', usersJson);
+  Future<void> _loadUserProfile({String? userId}) async {
+    try {
+      // Use provided userId or get from current user
+      final id = userId ?? SupabaseService.client.auth.currentUser?.id;
+      
+      if (id == null) {
+        _error = 'User not authenticated. Please sign in again.';
+        notifyListeners();
+        return;
+      }
+
+      final response = await SupabaseService.client
+          .from('profiles')
+          .select()
+          .eq('id', id)
+          .single();
+
+      _user = Map<String, dynamic>.from(response);
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = 'Failed to load user profile: $e';
+      notifyListeners();
+    }
   }
 
   Future<bool> login(String email, String password, String role) async {
@@ -52,70 +89,79 @@ class AuthProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
+    try {
+      // Validate input
+      if (email.isEmpty || password.isEmpty) {
+        _error = 'Please fill in all fields';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
 
-    // Validate input
-    if (email.isEmpty || password.isEmpty) {
-      _error = 'Please fill in all fields';
+      // Email validation
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (!emailRegex.hasMatch(email)) {
+        _error = 'Please enter a valid email address';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Sign in with Supabase
+      final response = await SupabaseService.client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response.user == null) {
+        _error = 'Login failed';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Load user profile
+      await _loadUserProfile();
+
+      // Check role
+      if (_user?['role'] != role) {
+        _error = 'Account role does not match selected role';
+        await logout();
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Check if account is active
+      if (!(_user?['is_active'] ?? true)) {
+        _error = 'Account is deactivated. Please contact support.';
+        await logout();
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Check if account is verified
+      if (!(_user?['is_verified'] ?? false)) {
+        _error = 'Account is not verified. Please contact support for verification.';
+        await logout();
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Login failed: $e';
       _isLoading = false;
       notifyListeners();
       return false;
     }
-
-    // Email validation
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
-      _error = 'Please enter a valid email address';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Find user by email
-    final user = _allUsers.firstWhere(
-      (user) => user['email'] == email,
-      orElse: () => {},
-    );
-
-    if (user.isEmpty) {
-      _error = 'No account found with this email address';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Check password
-    if (user['password'] != password) {
-      _error = 'Incorrect password';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Check role
-    if (user['role'] != role) {
-      _error = 'Account role does not match selected role';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Check if account is active
-    if (!user['isActive']) {
-      _error = 'Account is deactivated. Please contact support.';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Login successful
-    _user = Map<String, dynamic>.from(user);
-    _isLoading = false;
-    notifyListeners();
-    return true;
   }
 
-  // Citizen Registration (normal registration)
+  // Citizen Registration
   Future<bool> registerCitizen({
     required String email,
     required String password,
@@ -126,79 +172,154 @@ class AuthProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Validate input
+      if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty) {
+        _error = 'Please fill in all fields';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
 
-    // Validate input
-    if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty) {
-      _error = 'Please fill in all fields';
+      // Email validation
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (!emailRegex.hasMatch(email)) {
+        _error = 'Please enter a valid email address';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Password validation
+      if (password.length < 6) {
+        _error = 'Password must be at least 6 characters long';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Phone validation
+      final phoneRegex = RegExp(r'^\+91\s\d{10}$');
+      if (!phoneRegex.hasMatch(phoneNumber)) {
+        _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Sign up with Supabase
+      final authResponse = await SupabaseService.client.auth.signUp(
+        email: email,
+        password: password,
+        data: _isDevelopmentMode ? {'email_confirm': true} : null,
+      );
+
+      if (authResponse.user == null) {
+        _error = 'Registration failed';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // In development mode, skip email confirmation and create profile directly
+      if (_isDevelopmentMode) {
+        // Check if service role key is configured
+        if (AppConstants.supabaseServiceRoleKey == 'YOUR_SERVICE_ROLE_KEY_HERE') {
+          _error = 'Service role key not configured. Please add your Supabase service role key to constants.dart';
+          // Delete the user from auth since profile creation will fail
+          await SupabaseService.client.auth.signOut();
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+
+        try {
+          // Create profile using admin client (bypasses RLS)
+          await SupabaseService.adminClient
+              .from('profiles')
+              .insert({
+                'id': authResponse.user!.id,
+                'email': email,
+                'full_name': fullName,
+                'phone': phoneNumber,
+                'role': 'citizen',
+                'is_verified': true,
+              });
+        } catch (profileError) {
+          _error = 'Failed to create user profile: $profileError';
+          // Delete the user from auth since profile creation failed
+          try {
+            await SupabaseService.adminClient.auth.admin.deleteUser(authResponse.user!.id);
+          } catch (e) {
+            print('Failed to delete auth user: $e');
+          }
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+
+        // Load user profile
+        await _loadUserProfile(userId: authResponse.user!.id);
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+
+      // Production mode: Use admin confirmation
+      // Check if service role key is configured
+      if (AppConstants.supabaseServiceRoleKey == 'YOUR_SERVICE_ROLE_KEY_HERE') {
+        _error = 'Service role key not configured. Please add your Supabase service role key to constants.dart';
+        // Delete the user from auth since profile creation will fail
+        await SupabaseService.client.auth.signOut();
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      try {
+        // Create profile using admin client (bypasses RLS)
+        await SupabaseService.adminClient
+            .from('profiles')
+            .insert({
+              'id': authResponse.user!.id,
+              'email': email,
+              'full_name': fullName,
+              'phone': phoneNumber,
+              'role': 'citizen',
+              'is_verified': true,
+            });
+      } catch (profileError) {
+        _error = 'Failed to create user profile: $profileError';
+        // Delete the user from auth since profile creation failed
+        try {
+          await SupabaseService.adminClient.auth.admin.deleteUser(authResponse.user!.id);
+        } catch (e) {
+          print('Failed to delete auth user: $e');
+        }
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Confirm user email to allow immediate login
+      await _confirmUserEmail(authResponse.user!.id);
+
+      // Load user profile
+      await _loadUserProfile(userId: authResponse.user!.id);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Registration failed: $e';
       _isLoading = false;
       notifyListeners();
       return false;
     }
-
-    // Email validation
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
-      _error = 'Please enter a valid email address';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Password validation
-    if (password.length < 6) {
-      _error = 'Password must be at least 6 characters long';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Phone validation
-    final phoneRegex = RegExp(r'^\+91\s\d{10}$');
-    if (!phoneRegex.hasMatch(phoneNumber)) {
-      _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Check if email already exists
-    final existingUser = _allUsers.firstWhere(
-      (user) => user['email'] == email,
-      orElse: () => {},
-    );
-
-    if (existingUser.isNotEmpty) {
-      _error = 'Email already registered';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Create new citizen user
-    final newUser = {
-      'id': 'citizen_${DateTime.now().millisecondsSinceEpoch}',
-      'email': email,
-      'password': password, // In production, hash this
-      'name': fullName,
-      'fullName': fullName,
-      'role': 'citizen',
-      'phoneNumber': phoneNumber,
-      'isActive': true,
-      'isVerified': false,
-      'createdAt': DateTime.now().toIso8601String(),
-    };
-
-    _allUsers.add(newUser);
-    await _saveUsers();
-    _user = newUser;
-
-    _isLoading = false;
-    notifyListeners();
-    return true;
   }
 
-  // Inspector Registration (requires special registration code)
+  // Inspector Registration
   Future<bool> registerInspector({
     required String email,
     required String password,
@@ -212,91 +333,168 @@ class AuthProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Validate input
+      if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty ||
+          registrationCode.isEmpty || licenseNumber.isEmpty) {
+        _error = 'Please fill in all fields';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
 
-    // Validate input
-    if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty ||
-        registrationCode.isEmpty || licenseNumber.isEmpty) {
-      _error = 'Please fill in all fields';
+      // Email validation
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (!emailRegex.hasMatch(email)) {
+        _error = 'Please enter a valid email address';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Password validation
+      if (password.length < 6) {
+        _error = 'Password must be at least 6 characters long';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Phone validation
+      final phoneRegex = RegExp(r'^\+91\s\d{10}$');
+      if (!phoneRegex.hasMatch(phoneNumber)) {
+        _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Validate FSSAI license number
+      final licenseRegex = RegExp(r'^\d{14}$');
+      if (!licenseRegex.hasMatch(registrationCode)) {
+        _error = 'Please enter a valid 14-digit FSSAI license number';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Sign up with Supabase
+      final authResponse = await SupabaseService.client.auth.signUp(
+        email: email,
+        password: password,
+        data: _isDevelopmentMode ? {'email_confirm': true} : null,
+      );
+
+      if (authResponse.user == null) {
+        _error = 'Registration failed';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // In development mode, skip email confirmation and create profile directly
+      if (_isDevelopmentMode) {
+        // Check if service role key is configured
+        if (AppConstants.supabaseServiceRoleKey == 'YOUR_SERVICE_ROLE_KEY_HERE') {
+          _error = 'Service role key not configured. Please add your Supabase service role key to constants.dart';
+          // Delete the user from auth since profile creation will fail
+          await SupabaseService.client.auth.signOut();
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+
+        try {
+          // Create profile using admin client (bypasses RLS)
+          await SupabaseService.adminClient
+              .from('profiles')
+              .insert({
+                'id': authResponse.user!.id,
+                'email': email,
+                'full_name': fullName,
+                'phone': phoneNumber,
+                'role': 'inspector',
+                'department': department,
+                'license_number': licenseNumber,
+                'is_verified': true,
+              });
+        } catch (profileError) {
+          _error = 'Failed to create user profile: $profileError';
+          // Delete the user from auth since profile creation failed
+          try {
+            await SupabaseService.adminClient.auth.admin.deleteUser(authResponse.user!.id);
+          } catch (e) {
+            print('Failed to delete auth user: $e');
+          }
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+
+        // Load user profile
+        await _loadUserProfile(userId: authResponse.user!.id);
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+
+      // Production mode: Use admin confirmation
+      // Check if service role key is configured
+      if (AppConstants.supabaseServiceRoleKey == 'YOUR_SERVICE_ROLE_KEY_HERE') {
+        _error = 'Service role key not configured. Please add your Supabase service role key to constants.dart';
+        // Delete the user from auth since profile creation will fail
+        await SupabaseService.client.auth.signOut();
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      try {
+        // Create profile using admin client (bypasses RLS)
+        await SupabaseService.adminClient
+            .from('profiles')
+            .insert({
+              'id': authResponse.user!.id,
+              'email': email,
+              'full_name': fullName,
+              'phone': phoneNumber,
+              'role': 'inspector',
+              'department': department,
+              'license_number': licenseNumber,
+              'is_verified': true,
+            });
+      } catch (profileError) {
+        _error = 'Failed to create user profile: $profileError';
+        // Delete the user from auth since profile creation failed
+        try {
+          await SupabaseService.adminClient.auth.admin.deleteUser(authResponse.user!.id);
+        } catch (e) {
+          print('Failed to delete auth user: $e');
+        }
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Confirm user email to allow immediate login
+      await _confirmUserEmail(authResponse.user!.id);
+
+      // Load user profile
+      await _loadUserProfile(userId: authResponse.user!.id);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Registration failed: $e';
       _isLoading = false;
       notifyListeners();
       return false;
     }
-
-    // Email validation
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
-      _error = 'Please enter a valid email address';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Password validation
-    if (password.length < 6) {
-      _error = 'Password must be at least 6 characters long';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Phone validation
-    final phoneRegex = RegExp(r'^\+91\s\d{10}$');
-    if (!phoneRegex.hasMatch(phoneNumber)) {
-      _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Validate FSSAI license number (14-digit number)
-    final licenseRegex = RegExp(r'^\d{14}$');
-    if (!licenseRegex.hasMatch(registrationCode)) {
-      _error = 'Please enter a valid 14-digit FSSAI license number';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Check if email already exists
-    final existingUser = _allUsers.firstWhere(
-      (user) => user['email'] == email,
-      orElse: () => {},
-    );
-
-    if (existingUser.isNotEmpty) {
-      _error = 'Email already registered';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Create new inspector user
-    final newUser = {
-      'id': 'inspector_${DateTime.now().millisecondsSinceEpoch}',
-      'email': email,
-      'password': password, // In production, hash this
-      'name': fullName,
-      'fullName': fullName,
-      'role': 'inspector',
-      'phoneNumber': phoneNumber,
-      'department': department,
-      'licenseNumber': licenseNumber,
-      'isActive': true,
-      'isVerified': true, // Auto-verified for inspectors
-      'createdAt': DateTime.now().toIso8601String(),
-    };
-
-    _allUsers.add(newUser);
-    await _saveUsers();
-    _user = newUser;
-
-    _isLoading = false;
-    notifyListeners();
-    return true;
   }
 
-  // Admin Registration (requires admin approval or special code)
+  // Admin Registration
   Future<bool> registerAdmin({
     required String email,
     required String password,
@@ -309,186 +507,251 @@ class AuthProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Validate input
+      if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty ||
+          adminCode.isEmpty || organization.isEmpty) {
+        _error = 'Please fill in all fields';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
 
-    // Validate input
-    if (email.isEmpty || password.isEmpty || fullName.isEmpty || phoneNumber.isEmpty ||
-        adminCode.isEmpty || organization.isEmpty) {
-      _error = 'Please fill in all fields';
+      // Email validation
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (!emailRegex.hasMatch(email)) {
+        _error = 'Please enter a valid email address';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Password validation
+      if (password.length < 6) {
+        _error = 'Password must be at least 6 characters long';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Phone validation
+      final phoneRegex = RegExp(r'^\+91\s\d{10}$');
+      if (!phoneRegex.hasMatch(phoneNumber)) {
+        _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Validate admin code
+      const validAdminCodes = ['ADMIN2024', 'SUPERADMIN', 'FSSAISUPER'];
+      if (!validAdminCodes.contains(adminCode)) {
+        _error = 'Invalid admin registration code. Access denied.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Sign up with Supabase
+      final authResponse = await SupabaseService.client.auth.signUp(
+        email: email,
+        password: password,
+        data: _isDevelopmentMode ? {'email_confirm': true} : null,
+      );
+
+      if (authResponse.user == null) {
+        _error = 'Registration failed';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // In development mode, skip email confirmation and create profile directly
+      if (_isDevelopmentMode) {
+        // Check if service role key is configured
+        if (AppConstants.supabaseServiceRoleKey == 'YOUR_SERVICE_ROLE_KEY_HERE') {
+          _error = 'Service role key not configured. Please add your Supabase service role key to constants.dart';
+          // Delete the user from auth since profile creation will fail
+          await SupabaseService.client.auth.signOut();
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+
+        try {
+          // Create profile using admin client (bypasses RLS)
+          await SupabaseService.adminClient
+              .from('profiles')
+              .insert({
+                'id': authResponse.user!.id,
+                'email': email,
+                'full_name': fullName,
+                'phone': phoneNumber,
+                'role': 'admin',
+                'organization': organization,
+                'is_verified': true,
+              });
+        } catch (profileError) {
+          _error = 'Failed to create user profile: $profileError';
+          // Delete the user from auth since profile creation failed
+          try {
+            await SupabaseService.adminClient.auth.admin.deleteUser(authResponse.user!.id);
+          } catch (e) {
+            print('Failed to delete auth user: $e');
+          }
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+
+        // Load user profile
+        await _loadUserProfile(userId: authResponse.user!.id);
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+
+      // Production mode: Use admin confirmation
+      // Check if service role key is configured
+      if (AppConstants.supabaseServiceRoleKey == 'YOUR_SERVICE_ROLE_KEY_HERE') {
+        _error = 'Service role key not configured. Please add your Supabase service role key to constants.dart';
+        // Delete the user from auth since profile creation will fail
+        await SupabaseService.client.auth.signOut();
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      try {
+        // Create profile using admin client (bypasses RLS)
+        await SupabaseService.adminClient
+            .from('profiles')
+            .insert({
+              'id': authResponse.user!.id,
+              'email': email,
+              'full_name': fullName,
+              'phone': phoneNumber,
+              'role': 'admin',
+              'organization': organization,
+              'is_verified': true,
+            });
+      } catch (profileError) {
+        _error = 'Failed to create user profile: $profileError';
+        // Delete the user from auth since profile creation failed
+        try {
+          await SupabaseService.adminClient.auth.admin.deleteUser(authResponse.user!.id);
+        } catch (e) {
+          print('Failed to delete auth user: $e');
+        }
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Confirm user email to allow immediate login
+      await _confirmUserEmail(authResponse.user!.id);
+
+      // Load user profile
+      await _loadUserProfile(userId: authResponse.user!.id);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Registration failed: $e';
       _isLoading = false;
       notifyListeners();
       return false;
     }
-
-    // Email validation
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
-      _error = 'Please enter a valid email address';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Password validation
-    if (password.length < 6) {
-      _error = 'Password must be at least 6 characters long';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Phone validation
-    final phoneRegex = RegExp(r'^\+91\s\d{10}$');
-    if (!phoneRegex.hasMatch(phoneNumber)) {
-      _error = 'Please enter a valid phone number (+91 XXXXXXXXXX)';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Validate admin code (mock validation)
-    const validAdminCodes = ['ADMIN2024', 'SUPERADMIN', 'FSSAISUPER'];
-    if (!validAdminCodes.contains(adminCode)) {
-      _error = 'Invalid admin registration code. Access denied.';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Check if email already exists
-    final existingUser = _allUsers.firstWhere(
-      (user) => user['email'] == email,
-      orElse: () => {},
-    );
-
-    if (existingUser.isNotEmpty) {
-      _error = 'Email already registered';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-
-    // Create new admin user
-    final newUser = {
-      'id': 'admin_${DateTime.now().millisecondsSinceEpoch}',
-      'email': email,
-      'password': password, // In production, hash this
-      'name': fullName,
-      'fullName': fullName,
-      'role': 'admin',
-      'phoneNumber': phoneNumber,
-      'organization': organization,
-      'isActive': true,
-      'isVerified': true, // Auto-verified for admins
-      'createdAt': DateTime.now().toIso8601String(),
-    };
-
-    _allUsers.add(newUser);
-    await _saveUsers();
-    _user = newUser;
-
-    _isLoading = false;
-    notifyListeners();
-    return true;
   }
 
   Future<void> logout() async {
+    await SupabaseService.client.auth.signOut();
     _user = null;
     _error = null;
-    // Don't clear _allUsers on logout, they are persisted
     notifyListeners();
   }
 
-  // Admin functions
+  // Admin methods
   Future<void> fetchAllUsers() async {
     try {
-      // Users are already loaded from shared preferences
-      // This method ensures users are up to date
-      await Future.delayed(const Duration(milliseconds: 300));
+      final response = await SupabaseService.client
+          .from('profiles')
+          .select();
+
+      _allUsers = List<Map<String, dynamic>>.from(response);
       notifyListeners();
-    } catch (error) {
-      _error = 'Failed to fetch users: $error';
+    } catch (e) {
+      _error = 'Failed to fetch users: $e';
       notifyListeners();
     }
   }
 
   Future<void> updateUserRole(String userId, String newRole) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
+      await SupabaseService.client
+          .from('profiles')
+          .update({'role': newRole})
+          .eq('id', userId);
 
-      // Update in allUsers list
-      final userIndex = _allUsers.indexWhere((user) => user['id'] == userId);
-      if (userIndex != -1) {
-        _allUsers[userIndex]['role'] = newRole;
+      // Refresh users list
+      await fetchAllUsers();
+    } catch (e) {
+      _error = 'Failed to update user role: $e';
+      notifyListeners();
+    }
+  }
 
-        // Also update current user if it's the same user
-        if (_user?['id'] == userId) {
-          _user?['role'] = newRole;
-        }
+  Future<void> verifyUser(String userId, bool isVerified) async {
+    try {
+      await SupabaseService.client
+          .from('profiles')
+          .update({'is_verified': isVerified})
+          .eq('id', userId);
 
-        notifyListeners();
-      }
-    } catch (error) {
-      _error = 'Failed to update user role: $error';
+      // Refresh users list
+      await fetchAllUsers();
+    } catch (e) {
+      _error = 'Failed to verify user: $e';
       notifyListeners();
     }
   }
 
   Future<void> deleteUser(String userId) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
+      await SupabaseService.client
+          .from('profiles')
+          .delete()
+          .eq('id', userId);
 
-      // Don't allow admin to delete themselves
-      if (_user?['id'] == userId) {
-        _error = 'Cannot delete your own account';
-        notifyListeners();
-        return;
-      }
-
-      _allUsers.removeWhere((user) => user['id'] == userId);
-      notifyListeners();
-    } catch (error) {
-      _error = 'Failed to delete user: $error';
+      // Refresh users list
+      await fetchAllUsers();
+    } catch (e) {
+      _error = 'Failed to delete user: $e';
       notifyListeners();
     }
   }
 
-  Future<void> updateUserProfile(Map<String, dynamic> updatedData) async {
+  Future<void> updateUserProfile(Map<String, dynamic> updates) async {
+    if (_user == null) return;
+
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
+      await SupabaseService.client
+          .from('profiles')
+          .update(updates)
+          .eq('id', _user!['id']);
 
-      if (_user != null) {
-        _user = {..._user!, ...updatedData};
-
-        // Also update in allUsers list if admin is viewing
-        if (_user?['role'] == 'admin' || _allUsers.isNotEmpty) {
-          final userIndex = _allUsers.indexWhere((u) => u['id'] == _user?['id']);
-          if (userIndex != -1) {
-            _allUsers[userIndex] = {..._allUsers[userIndex], ...updatedData};
-          }
-        }
-
-        await _saveUsers();
-        notifyListeners();
-      }
-    } catch (error) {
-      _error = 'Failed to update profile: $error';
+      // Reload profile
+      await _loadUserProfile();
+    } catch (e) {
+      _error = 'Failed to update profile: $e';
       notifyListeners();
     }
   }
 
-  // Clear error message
   void clearError() {
     _error = null;
     notifyListeners();
   }
-
-  // Check if user has admin privileges
-  bool get isAdmin => _user?['role'] == 'admin';
-
-  // Check if user has inspector privileges
-  bool get isInspector => _user?['role'] == 'inspector';
-
-  // Check if user has citizen privileges
-  bool get isCitizen => _user?['role'] == 'citizen';
 }

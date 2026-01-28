@@ -1,0 +1,37 @@
+import 'dart:ui';
+
+/// EXAMPLE/TEMPLATE FILE - DO NOT COMMIT WITH REAL KEYS
+/// Copy this file to constants.dart and fill in your actual values
+/// 
+/// Get your Supabase credentials from:
+/// 1. Go to https://supabase.com and sign in
+/// 2. Select your project
+/// 3. Go to Settings → API
+/// 4. Copy Project URL and Anon Key
+
+class AppConstants {
+  static const String appName = 'Food Safety Monitor';
+  static const String apiBaseUrl = 'http://localhost:8000';
+  
+  // Supabase Configuration
+  // Replace with your actual Supabase project URL
+  static const String supabaseUrl = 'https://YOUR_PROJECT_ID.supabase.co';
+  
+  // Replace with your actual Anon Key (public, safe for client)
+  static const String supabaseAnonKey = 'YOUR_ANON_KEY_HERE';
+  
+  // Replace with your actual Service Role Key (KEEP SECRET - server only)
+  // Get from Supabase Dashboard → Settings → API → Service Role Key
+  static const String supabaseServiceRoleKey = 'YOUR_SERVICE_ROLE_KEY_HERE';
+  
+  // Colors
+  static const Color primaryColor = Color(0xFF2196F3);
+  static const Color secondaryColor = Color(0xFF4CAF50);
+  static const Color dangerColor = Color(0xFFF44336);
+  static const Color warningColor = Color(0xFFFF9800);
+  static const Color successColor = Color(0xFF4CAF50);
+  
+  // Padding
+  static const double defaultPadding = 16.0;
+  static const double defaultRadius = 12.0;
+}
