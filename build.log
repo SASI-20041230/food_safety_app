@@ -1,0 +1,28 @@
+Running Gradle task 'assembleRelease'...                        
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 10456 bytes (99.4% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+C:\Users\tejan\food_safety_app\android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java:39: error: cannot find symbol
+      flutterEngine.getPlugins().add(new io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin());
+                                                                             ^
+  symbol:   class SharedPreferencesPlugin
+  location: package io.flutter.plugins.sharedpreferences
+1 error
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileReleaseJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  C:\Users\tejan\food_safety_app\android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java:39: error: cannot find symbol
+        flutterEngine.getPlugins().add(new io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin());
+                                                                               ^
+    symbol:   class SharedPreferencesPlugin
+    location: package io.flutter.plugins.sharedpreferences
+  1 error
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 2m 25s
+Running Gradle task 'assembleRelease'...                          146.9s
+Gradle task assembleRelease failed with exit code 1

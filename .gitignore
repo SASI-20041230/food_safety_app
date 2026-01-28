@@ -38,3 +38,9 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+lib/config/constants.dart
